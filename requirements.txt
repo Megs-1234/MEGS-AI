@@ -1,5 +1,6 @@
 python-telegram-bot==22.3
 openai
-together
-requests
+google-genai
 python-dotenv
+requests
+together

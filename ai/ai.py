@@ -1,14 +1,10 @@
-from openai import OpenAI
-from config import OPENROUTER_API_KEY
+print("🔥 GEMINI VERSION LOADED")
+
+from providers.gemini import ask_gemini
 
 from ai.memory_db import (
     save_message,
     load_messages
-)
-
-client = OpenAI(
-    api_key=OPENROUTER_API_KEY,
-    base_url="https://openrouter.ai/api/v1",
 )
 
 
@@ -37,31 +33,30 @@ def clean_response(text):
 
 def ask_ai(user_id, message):
 
-    save_message(user_id, "user", message)
+    save_message(
+        user_id,
+        "user",
+        message
+    )
 
     messages = load_messages(user_id)
 
     try:
 
-        response = client.chat.completions.create(
-            model="openrouter/free",
-            messages=messages
-        )
-
-        if not response.choices:
-            return "No response from OpenRouter."
-
-        answer = response.choices[0].message.content
-
-        if not answer:
-            return "The AI returned an empty response."
+        answer = ask_gemini(messages)
 
         answer = clean_response(answer)
 
-        save_message(user_id, "assistant", answer)
+        save_message(
+            user_id,
+            "assistant",
+            answer
+        )
 
         return answer
 
     except Exception as e:
+
         print(e)
-        return f"❌ OpenRouter Error:\n{e}"
+
+        return "Sorry, Gemini is currently unavailable. Please try again in a few minutes."
