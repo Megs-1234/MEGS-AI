@@ -1,5 +1,3 @@
-print("🔥 GEMINI VERSION LOADED")
-
 from providers.gemini import ask_gemini
 
 from ai.memory_db import (
@@ -33,20 +31,25 @@ def clean_response(text):
 
 def ask_ai(user_id, message):
 
+    # Save user's message
     save_message(
         user_id,
         "user",
         message
     )
 
+    # Load previous conversation
     messages = load_messages(user_id)
 
     try:
 
+        # Ask Gemini
         answer = ask_gemini(messages)
 
+        # Clean response
         answer = clean_response(answer)
 
+        # Save AI response
         save_message(
             user_id,
             "assistant",
@@ -57,6 +60,15 @@ def ask_ai(user_id, message):
 
     except Exception as e:
 
+        print("===================================")
+        print("GEMINI ERROR")
+        print("===================================")
+        print(type(e))
         print(e)
+        print("===================================")
 
-        return "Sorry, Gemini is currently unavailable. Please try again in a few minutes."
+        return (
+            f"❌ GEMINI ERROR\n\n"
+            f"{type(e).__name__}\n\n"
+            f"{e}"
+        )
