@@ -2,6 +2,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
 from admin.helpers import is_admin
+from admin.state import broadcast_waiting
 from database.database import cursor
 
 
@@ -23,14 +24,10 @@ async def admin_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if data == "stats":
 
-        cursor.execute(
-            "SELECT COUNT(DISTINCT user_id) FROM memory"
-        )
+        cursor.execute("SELECT COUNT(DISTINCT user_id) FROM memory")
         total_users = cursor.fetchone()[0]
 
-        cursor.execute(
-            "SELECT COUNT(*) FROM memory"
-        )
+        cursor.execute("SELECT COUNT(*) FROM memory")
         total_messages = cursor.fetchone()[0]
 
         keyboard = [
@@ -38,12 +35,10 @@ async def admin_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]
 
         await query.edit_message_text(
-            text=(
-                "📊 MEGS AI Statistics\n\n"
-                f"👥 Users: {total_users}\n"
-                f"💬 Messages: {total_messages}\n\n"
-                "🟢 Bot Status: Online"
-            ),
+            f"📊 MEGS AI Statistics\n\n"
+            f"👥 Users: {total_users}\n"
+            f"💬 Messages: {total_messages}\n\n"
+            f"🟢 Status: Online",
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
         return
@@ -55,11 +50,7 @@ async def admin_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if data == "users":
 
         cursor.execute(
-            """
-            SELECT DISTINCT user_id
-            FROM memory
-            ORDER BY user_id
-            """
+            "SELECT DISTINCT user_id FROM memory ORDER BY user_id"
         )
 
         rows = cursor.fetchall()
@@ -76,9 +67,29 @@ async def admin_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]
 
         await query.edit_message_text(
-            text=text,
+            text,
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
+
+        return
+
+    # ==========================
+    # Broadcast
+    # ==========================
+
+    if data == "broadcast":
+
+        broadcast_waiting.add(user_id)
+
+        keyboard = [
+            [InlineKeyboardButton("⬅ Back", callback_data="home")]
+        ]
+
+        await query.edit_message_text(
+            "📢 Send the message you want to broadcast to everyone.",
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+
         return
 
     # ==========================
@@ -89,18 +100,16 @@ async def admin_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         keyboard = [
             [InlineKeyboardButton("🤖 AI: Gemini", callback_data="nothing")],
-            [InlineKeyboardButton("🖼 Image: Enabled", callback_data="nothing")],
-            [InlineKeyboardButton("🌐 Internet Search: Coming Soon", callback_data="nothing")],
+            [InlineKeyboardButton("🖼 Images: Enabled", callback_data="nothing")],
+            [InlineKeyboardButton("🌐 Internet: Coming Soon", callback_data="nothing")],
             [InlineKeyboardButton("⬅ Back", callback_data="home")]
         ]
 
         await query.edit_message_text(
-            text=(
-                "⚙️ MEGS AI Settings\n\n"
-                "Current configuration:"
-            ),
+            "⚙️ MEGS AI Settings",
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
+
         return
 
     # ==========================
@@ -114,13 +123,14 @@ async def admin_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton("👥 Users", callback_data="users")],
             [InlineKeyboardButton("📢 Broadcast", callback_data="broadcast")],
             [InlineKeyboardButton("⚙️ Settings", callback_data="settings")],
-            [InlineKeyboardButton("❌ Close", callback_data="close")],
+            [InlineKeyboardButton("❌ Close", callback_data="close")]
         ]
 
         await query.edit_message_text(
             "👑 MEGS AI Admin Panel",
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
+
         return
 
     # ==========================
@@ -132,15 +142,11 @@ async def admin_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(
             "✅ Admin panel closed."
         )
-        return
 
-    # ==========================
-    # Placeholder Buttons
-    # ==========================
+        return
 
     if data == "nothing":
 
         await query.answer(
-            "🚧 This feature will be available soon.",
-            show_alert=False
+            "🚧 Coming Soon!"
         )
