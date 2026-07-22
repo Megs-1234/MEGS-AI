@@ -42,7 +42,7 @@ async def admin_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "📊 MEGS AI Statistics\n\n"
                 f"👥 Users: {total_users}\n"
                 f"💬 Messages: {total_messages}\n\n"
-                "🟢 Status: Online"
+                "🟢 Bot Status: Online"
             ),
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
@@ -82,6 +82,28 @@ async def admin_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     # ==========================
+    # Settings
+    # ==========================
+
+    if data == "settings":
+
+        keyboard = [
+            [InlineKeyboardButton("🤖 AI: Gemini", callback_data="nothing")],
+            [InlineKeyboardButton("🖼 Image: Enabled", callback_data="nothing")],
+            [InlineKeyboardButton("🌐 Internet Search: Coming Soon", callback_data="nothing")],
+            [InlineKeyboardButton("⬅ Back", callback_data="home")]
+        ]
+
+        await query.edit_message_text(
+            text=(
+                "⚙️ MEGS AI Settings\n\n"
+                "Current configuration:"
+            ),
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+        return
+
+    # ==========================
     # Home
     # ==========================
 
@@ -109,4 +131,16 @@ async def admin_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         await query.edit_message_text(
             "✅ Admin panel closed."
+        )
+        return
+
+    # ==========================
+    # Placeholder Buttons
+    # ==========================
+
+    if data == "nothing":
+
+        await query.answer(
+            "🚧 This feature will be available soon.",
+            show_alert=False
         )
