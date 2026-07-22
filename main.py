@@ -19,7 +19,7 @@ from media.image import image
 
 # Admin Commands
 from admin.stats import stats
-
+from admin.users import users
 
 app = ApplicationBuilder().token(TOKEN).build()
 
@@ -32,6 +32,7 @@ app.add_handler(CommandHandler("image", image))
 
 # Admin Commands
 app.add_handler(CommandHandler("stats", stats))
+app.add_handler(CommandHandler("users", users))
 
 # Chat
 app.add_handler(
