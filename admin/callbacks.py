@@ -42,11 +42,43 @@ async def admin_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "📊 MEGS AI Statistics\n\n"
                 f"👥 Users: {total_users}\n"
                 f"💬 Messages: {total_messages}\n\n"
-                "🟢 Bot Status: Online"
+                "🟢 Status: Online"
             ),
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
+        return
 
+    # ==========================
+    # Users
+    # ==========================
+
+    if data == "users":
+
+        cursor.execute(
+            """
+            SELECT DISTINCT user_id
+            FROM memory
+            ORDER BY user_id
+            """
+        )
+
+        rows = cursor.fetchall()
+
+        text = "👥 Registered Users\n\n"
+
+        for i, row in enumerate(rows, start=1):
+            text += f"{i}. {row[0]}\n"
+
+        text += f"\nTotal Users: {len(rows)}"
+
+        keyboard = [
+            [InlineKeyboardButton("⬅ Back", callback_data="home")]
+        ]
+
+        await query.edit_message_text(
+            text=text,
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
         return
 
     # ==========================
@@ -67,7 +99,6 @@ async def admin_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "👑 MEGS AI Admin Panel",
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
-
         return
 
     # ==========================
